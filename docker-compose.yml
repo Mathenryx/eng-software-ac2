@@ -10,7 +10,7 @@ services:
     - db-volume:/var/lib/postgresql/data
 
   api:
-    image: app/eng-software-ac2
+    image: app/eng-software-ac2-dev
     environment:
       DB_HOST: database
     ports:
