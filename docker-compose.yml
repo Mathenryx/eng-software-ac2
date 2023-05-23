@@ -1,19 +1,12 @@
-version: '3'
+version: '1'
 
 services:
-  database:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: papi
-    volumes:
-    - db-volume:/var/lib/postgresql/data
-
-  api:
-    image: app/eng-software-ac2-dev
-    environment:
-      DB_HOST: database
+  jenkins:
+    image: eng-software-ac2/prod
     ports:
-      - "9090:9090"
+      - "8080:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+
 volumes:
-  db-volume:
+  jenkins_data:
