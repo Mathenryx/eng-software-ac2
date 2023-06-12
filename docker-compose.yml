@@ -1,12 +1,20 @@
-version: '1'
+version: '3'
 
 services:
-  jenkins:
-    image: eng-software-ac2/prod
-    ports:
-      - "8080:8080"
+  database:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 1234567
+      POSTGRES_DB: docker-compose-db
     volumes:
-      - jenkins_data:/var/jenkins_home
+    - db-volume:/var/lib/postgresql/data
+        
+  api:
+    image: eng-software-ac2/prod
+    environment:
+      DB_HOST: database
+    ports:
+      - "9090:9090"
 
 volumes:
-  jenkins_data:
+  db-volume:
