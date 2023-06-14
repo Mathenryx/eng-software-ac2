@@ -1,32 +1,51 @@
 pipeline {
-  agent any
-  stages {
-    stage("verify tooling") {
-      steps {
-        bat '''
-          docker version
-          docker info
-          docker compose version
-          curl --version
-          '''
-      }
+    agent any
+    
+    stages {
+        stage('Checkout Source Code') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: 'https://github.com/Mathenryx/eng-software-ac2']]])
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                bat "mvn clean package"
+            }
+        }
+        
+        stage('Deploy Dev') {
+            steps {
+                build job: "Dev", wait: true
+            }
+        }
+        
+        stage('Deploy Hom') {
+            steps {
+                build job: "Hom", wait: true
+            }
+        }
+        
+        stage('Deploy Prod') {
+            steps {
+                build job: "Prod", wait: true
+            }
+        }
+        
+        stage('Start container') {
+            steps {
+                bat 'docker compose up -d'
+            }
+        }
+        
     }
-    stage('Prune Docker data') {
-      steps {
-        bat 'docker system prune -a --volumes -f'
-      }
+    
+    post {
+        success {
+            echo 'Pipeline succeeded! Application deployed to prod.'
+        }
+        failure {
+            echo 'Pipeline failed! Application deployment unsuccessful.'
+        }
     }
-    stage('Start container') {
-      steps {
-        bat 'docker compose up -d --no-color --wait'
-        bat 'docker compose ps'
-      }
-    }
-    stage('Run tests against the container') {
-      steps {
-        bat 'curl http://localhost:9090'
-      }
-    }
-  }
-
 }
